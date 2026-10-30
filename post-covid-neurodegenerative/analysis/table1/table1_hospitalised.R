@@ -15,6 +15,7 @@ fs::dir_create(here::here(table1_dir))
 print("Source common functions")
 
 source("analysis/utility.R")
+source("analysis/table1/fn-hospitalised_counts.R")
 
 # Specify arguments ------------------------------------------------------------
 print("Specify arguments")
@@ -88,10 +89,10 @@ df$nonhospitalised = !is.na(df$exp_date_covid) &
   !(df$sub_cat_covidhospital == "hospitalised")
 
 median_iqr_age_hosp <- create_median_iqr_string(
-  df[df$hospitalised, ]$cov_num_age
+  df$cov_num_age[df$hospitalised]
 ) # See utility.R
 median_iqr_age_nonhosp <- create_median_iqr_string(
-  df[df$nonhospitalised, ]$cov_num_age
+  df$cov_num_age[df$nonhospitalised]
 ) # See utility.R
 
 
@@ -109,52 +110,11 @@ df <- df[, c(
 
 df$All <- "All"
 
-# Filter binary data
-
-for (colname in colnames(df)[grepl("cov_bin_", colnames(df))]) {
-  df[[colname]] <- sapply(df[[colname]], as.character)
-}
-
-df <- df %>%
-  mutate(across(where(is.factor), as.character))
-
-
-# Convert to characteristics and subcharacteristics ----------------------------
-print("Convert to characteristics and subcharacteristics")
-
-df <- tidyr::pivot_longer(
-  df,
-  cols = setdiff(
-    colnames(df),
-    c("patient_id", "hospitalised", "nonhospitalised")
-  ),
-  names_to = "characteristic",
-  values_to = "subcharacteristic"
-)
-
-df$total <- 1
-
-# Tidy missing data labels -----------------------------------------------------
-print("Tidy missing data labels")
-
-df$subcharacteristic <- ifelse(
-  df$subcharacteristic == "" |
-    df$subcharacteristic == "unknown" |
-    is.na(df$subcharacteristic),
-  "Missing",
-  df$subcharacteristic
-)
-
 # Aggregate data ---------------------------------------------------------------
 
 print("Aggregate data")
 
-df <- aggregate(
-  cbind(total, hospitalised, nonhospitalised) ~
-    characteristic + subcharacteristic,
-  data = df,
-  sum
-)
+df <- hospitalised_counts(df)
 
 
 # Sort characteristics ---------------------------------------------------------
