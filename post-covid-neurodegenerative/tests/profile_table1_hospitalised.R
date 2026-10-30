@@ -1,7 +1,7 @@
 # Run each method in a fresh process; see docs/table1_hospitalised_memory.md.
 options(warn = 2)
 suppressPackageStartupMessages(library(dplyr))
-loadNamespace("tidyr")
+invisible(loadNamespace("tidyr"))
 source("tests/table1_hospitalised_helpers.R")
 args <- commandArgs(trailingOnly = TRUE)
 method <- args[[1]]
@@ -16,7 +16,7 @@ if (method == "legacy") {
 } else {
   stop("Method must be legacy or incremental")
 }
-gc()
+invisible(gc())
 elapsed <- system.time(result <- count(df))[["elapsed"]]
 cat(sprintf(
   "method=%s patients=%d characteristics=%d elapsed_seconds=%.3f rows=%d\n",
