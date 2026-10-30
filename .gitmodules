@@ -1,0 +1,3 @@
+[submodule "post-covid-neurodegenerative"]
+	path = post-covid-neurodegenerative
+	url = https://github.com/opensafely/post-covid-neurodegenerative.git
